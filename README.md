@@ -12,7 +12,13 @@ algashop-meta/                     ← repo meta (ems-aw-algashop-meta)
 │   ├── billing/                   ← submodule (futur)
 │   ├── payment/                   ← submodule (futur)
 │   └── catalog/                   ← submodule (futur)
+├── .claude/                       ← configuration Claude Code partagée (voir section 8)
+│   ├── settings.json              ← permissions + hook de tests
+│   ├── hooks/run-tests.sh         ← lance `./gradlew test` après édition d'un fichier .java
+│   └── skills/bump-submodule/     ← skill `/bump-submodule <chemin>`
 ├── .gitmodules                    ← fichier généré par Git, liste les submodules
+├── .sdkmanrc                      ← version Java du projet (Temurin 21)
+├── CLAUDE.md                      ← instructions pour Claude Code
 └── README.md
 ```
 
@@ -151,7 +157,31 @@ git push origin main
 
 > Le déplacement en deux temps est nécessaire quand on déplace un dossier « à l'intérieur de lui-même ».
 
-## 7. Dépannage
+## 7. Environnement, build et tests
+
+- **Java 21** (Temurin), épinglé dans `.sdkmanrc` : avec SDKMAN!, lancer `sdk env install` puis `sdk env` (ou activer `sdkman_auto_env=true`).
+- Chaque microservice possède son propre **Gradle wrapper** :
+
+```bash
+cd microservices/ordering
+./gradlew test
+```
+
+## 8. Outillage Claude Code
+
+Le dossier `.claude/` du meta est versionné et partagé :
+
+| Élément | Rôle |
+|---------|------|
+| `settings.json` → `permissions` | Autorise `./gradlew`, `git status`, `git diff`, `git submodule status` ; interdit `git push` et la lecture des fichiers `.env*` |
+| `hooks/run-tests.sh` (hook `PostToolUse` sur `Edit`/`Write`) | Après modification d'un fichier `.java`, remonte jusqu'au `gradlew` le plus proche et exécute `./gradlew test -q --offline` (nécessite `jq`) |
+| `skills/bump-submodule` | `/bump-submodule microservices/ordering` : vérifie que le submodule est propre, fait `git add` + commit `chore: bump <chemin> submodule`, **sans pousser** |
+
+Les réglages personnels vont dans `.claude/settings.local.json` (ignoré par Git).
+
+> Chaque microservice a aussi son propre `CLAUDE.md` (et éventuellement ses skills, ex. `/new-value-object` dans `ordering`).
+
+## 9. Dépannage
 
 ### Supprimer proprement un submodule
 
