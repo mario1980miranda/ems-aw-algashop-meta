@@ -8,3 +8,10 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+/algashop-meta.iml
+/compiler.xml
+/gradle.xml
+/misc.xml
+/modules.xml
+/modules/ordering.main.iml
+/vcs.xml
